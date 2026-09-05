@@ -982,5 +982,16 @@ do
   -- require 'custom.plugins'
 end
 
+-- Clipboard: 헤드리스/SSH 환경에서는 xclip/xsel이 동작하지 않으므로
+-- 터미널 OSC52 이스케이프로 시스템 클립보드와 연동한다.
+do
+  local osc52 = require 'vim.ui.clipboard.osc52'
+  vim.g.clipboard = {
+    name = 'OSC 52',
+    copy = { ['+'] = osc52.copy '+', ['*'] = osc52.copy '*' },
+    paste = { ['+'] = osc52.paste '+', ['*'] = osc52.paste '*' },
+  }
+end
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
