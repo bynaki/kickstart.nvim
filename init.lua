@@ -694,8 +694,25 @@ do
   local servers = {
     -- clangd = {},
     -- gopls = {},
-    -- pyright = {},
     -- rust_analyzer = {},
+
+    -- 파이썬: 타입 검사는 basedpyright, lint/포맷은 ruff가 맡는다.
+    basedpyright = {
+      settings = {
+        basedpyright = {
+          analysis = {
+            -- 열려 있는 파일만 검사한다. 워크스페이스 전체는 큰 프로젝트에서 느리다.
+            diagnosticMode = 'openFilesOnly',
+          },
+        },
+      },
+    },
+    ruff = {
+      on_attach = function(client)
+        -- hover는 basedpyright 쪽만 쓴다 (중복 방지).
+        client.server_capabilities.hoverProvider = false
+      end,
+    },
     --
     -- Some languages (like typescript) have entire language plugins that can be useful:
     --    https://github.com/pmizio/typescript-tools.nvim
@@ -801,7 +818,8 @@ do
     formatters_by_ft = {
       -- rust = { 'rustfmt' },
       -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
+      -- ruff 하나가 isort/black을 대체한다. import 정렬 후 포맷 순서로 실행.
+      python = { 'ruff_organize_imports', 'ruff_format' },
       --
       -- You can use 'stop_after_first' to run the first available formatter from the list
       -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -979,7 +997,7 @@ do
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- require 'custom.plugins'
+  require 'custom.plugins'
 end
 
 -- Clipboard: 헤드리스/SSH 환경에서는 xclip/xsel이 동작하지 않으므로
